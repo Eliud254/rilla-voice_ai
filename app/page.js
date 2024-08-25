@@ -109,14 +109,16 @@ export default function Home() {
       </div>
 
       <div className={styles.audioRecording}>
-        <Button variant="contained" onClick={startRecording} disabled={recording}>
-          {recording ? 'Recording...' : 'Start Recording'}
+        <Button onClick={startRecording} disabled={recording}>
+          Start Recording
         </Button>
-        {audioUrl && <audio src={audioUrl} controls className={styles.audioPlayer} />}
-        <Button variant="contained" onClick={handleAudioUpload} disabled={!audioUrl || recording}>
-          Transcribe Audio
+        <Button onClick={stopRecording} disabled={!recording}>
+          Stop Recording
         </Button>
+        {audioUrl && <audio src={audioUrl} controls />}
       </div>
+
+      <Button onClick={handleAudioUpload}>Upload and Transcribe</Button>
 
       <div className={styles.commentForm}>
         <TextField

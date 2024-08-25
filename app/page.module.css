@@ -5,7 +5,10 @@
   align-items: center;
   padding: 6rem;
   min-height: 100vh;
-  background: linear-gradient(to bottom, hwb(226 11% 48%), hsl(204, 88%, 52%));
+  background-image: linear-gradient(to bottom, #262b54, #0a8fc4);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .main {
@@ -63,6 +66,28 @@
   padding: 10px;
   margin-bottom: 10px;
 }
+
+.button {
+  background-color: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 37.5px;
+  padding: 15px 30px;
+  margin: 7.5px;
+  font-size: 24px;
+  color: #262b54;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(10, 143, 196, 0.5);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+}
+
+.button:hover {
+  background-color: rgba(255, 255, 255, 1);
+  text-shadow: 0 0 15px rgba(10, 143, 196, 0.8);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+}
+
 
 .description {
   display: inherit;
