@@ -120,7 +120,7 @@ export default function Home() {
 
     /*const response = await axios.post('/api/ai', { text });
     return response.data.message;*/
-  };
+c  };
 
   useEffect(() => {
     // Ensure media devices are ready
