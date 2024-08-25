@@ -3,6 +3,8 @@ from flask_cors import CORS
 import sounddevice as sd
 from scipy.io.wavfile import write
 import numpy as np
+import os
+from transcription import transcribe_audio  # Import the transcription function
 
 app = Flask(__name__)
 CORS(app)
@@ -10,18 +12,28 @@ CORS(app)
 @app.route('/')
 def home():
     return "Flask server is running!"
+
 @app.route('/record', methods=['POST'])
 def record_audio():
-    print("Received request to /record endpoint")  # Add this log
+    print("Received request to /record endpoint")
     try:
         duration = request.json.get('duration', 5)
         fs = 44100
         print("Recording...")
         audio_data = sd.rec(int(duration * fs), samplerate=fs, channels=2)
         sd.wait()
-        write("output.wav", fs, np.array(audio_data * 32767, dtype=np.int16))
+        output_filename = "output.wav"
+        write(output_filename, fs, np.array(audio_data * 32767, dtype=np.int16))
         print("Recording complete.")
-        return jsonify({"message": "Recording complete", "file": "output.wav"}), 200
+        
+        # Now, transcribe the audio file using the imported function
+        transcript = transcribe_audio(output_filename)
+        
+        # Delete the audio file after processing
+        if os.path.exists(output_filename):
+            os.remove(output_filename)
+        
+        return jsonify({"message": "Recording complete", "transcript": transcript}), 200
     except Exception as e:
         print(f"Error: {e}")
         return jsonify({"message": "Error recording audio.", "error": str(e)}), 500
