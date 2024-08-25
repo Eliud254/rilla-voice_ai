@@ -138,16 +138,18 @@ c  };
       </div>
 
       <div className={styles.audioRecording}>
-        <Button onClick={startRecording} disabled={recording}>
+        <button className={styles.button} onClick={startRecording} disabled={recording}>
           Start Recording
-        </Button>
-        <Button onClick={stopRecording} disabled={!recording}>
+        </button>
+        <button className={styles.button} onClick={stopRecording} disabled={!recording}>
           Stop Recording
-        </Button>
+        </button>
         {audioUrl && <audio src={audioUrl} controls />}
       </div>
 
-      <Button onClick={handleAudioUpload}>Upload and Transcribe</Button>
+      <button className={styles.button} onClick={handleAudioUpload}>
+        Upload and Transcribe
+      </button>
 
       <div className={styles.commentForm}>
         <textarea
