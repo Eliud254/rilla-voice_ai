@@ -1,14 +1,18 @@
-/*import Image from "next/image";*/
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './page.module.css';
+import axios from 'axios';
+import { Button, CircularProgress, Typography } from '@mui/material';
 
 export default function Home() {
-  const [transcript, setTranscript] = useState('Insert Text to use.');
+  const [transcript, setTranscript] = useState('');
   const [comments, setComments] = useState([]);
   const [selectedText, setSelectedText] = useState('');
   const [newComment, setNewComment] = useState('');
   const [file, setFile] = useState(null);
+  const [recording, setRecording] = useState(false);
+  const [audioUrl, setAudioUrl] = useState(null);
+  const [aiResponse, setAiResponse] = useState('');
 
   const handleSelection = () => {
     const selection = window.getSelection();
@@ -32,13 +36,64 @@ export default function Home() {
     setFile(e.target.files[0]);
   };
 
+  const startRecording = () => {
+    setRecording(true);
+    const mediaRecorder = new MediaRecorder(window.stream);
+    mediaRecorder.ondataavailable = function(e) {
+      const url = URL.createObjectURL(e.data);
+      setAudioUrl(url);
+    };
+    mediaRecorder.start();
+  };
+
+  const stopRecording = () => {
+    setRecording(false);
+  };
+
+  const handleAudioUpload = async () => {
+    // Upload audio to your server or a third-party service and transcribe it
+    // For example, use an API like OpenAI Whisper for transcription
+
+    const transcriptedText = "Transcribed text here..."; // Replace this with actual transcribed text
+    setTranscript(transcriptedText);
+
+    // Get AI response
+    const response = await getAiResponse(transcriptedText);
+    setAiResponse(response);
+  };
+
+  const getAiResponse = async (text) => {
+    // Replace with your AI API call
+    const response = await axios.post('/api/ai', { text });
+    return response.data.message;
+  };
+
+  useEffect(() => {
+    // Ensure media devices are ready
+    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+      window.stream = stream;
+    });
+  }, []);
+
   return (
     <main className={styles.main}>
       <h1>Transcript Commenting & Editing System</h1>
       
       <div className={styles.transcriptContainer} onMouseUp={handleSelection}>
-        {transcript}
+        {transcript || "Insert Text to use."}
       </div>
+
+      <div className={styles.audioRecording}>
+        <Button onClick={startRecording} disabled={recording}>
+          Start Recording
+        </Button>
+        <Button onClick={stopRecording} disabled={!recording}>
+          Stop Recording
+        </Button>
+        {audioUrl && <audio src={audioUrl} controls />}
+      </div>
+
+      <Button onClick={handleAudioUpload}>Upload and Transcribe</Button>
 
       <div className={styles.commentForm}>
         <textarea
@@ -61,100 +116,13 @@ export default function Home() {
           </div>
         ))}
       </div>
+
+      {aiResponse && (
+        <div className={styles.aiResponse}>
+          <Typography variant="h6">AI Response:</Typography>
+          <p>{aiResponse}</p>
+        </div>
+      )}
     </main>
   );
 }
-
-  
-/*export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
-}*/
