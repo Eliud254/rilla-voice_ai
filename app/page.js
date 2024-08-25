@@ -138,10 +138,18 @@ export default function Home() {
       </div>
 
       <div className={styles.audioRecording}>
-        <button className={styles.button} onClick={startRecording} disabled={recording}>
+        <button 
+          className={`${styles.button} ${recording ? styles.buttonRecording : ''}`} 
+          onClick={startRecording} 
+          disabled={recording}
+        >
           Start Recording
         </button>
-        <button className={styles.button} onClick={stopRecording} disabled={!recording}>
+        <button 
+          className={styles.button}
+          onClick={stopRecording} 
+          disabled={!recording}
+        >
           Stop Recording
         </button>
         {audioUrl && <audio src={audioUrl} controls />}
@@ -153,12 +161,16 @@ export default function Home() {
 
       <div className={styles.commentForm}>
         <textarea
+          className={styles.commentTextarea}
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           placeholder="Add a comment..."
         />
-        <input type="file" onChange={handleFileChange} />
-        <button onClick={addComment}>Add Comment</button>
+        <label className={styles.fileInput}>
+          Choose File
+          <input type="file" onChange={handleFileChange} />
+        </label>
+        <button className={styles.addCommentButton} onClick={addComment}>Add Comment</button>
       </div>
 
       <div className={styles.commentsContainer}>
