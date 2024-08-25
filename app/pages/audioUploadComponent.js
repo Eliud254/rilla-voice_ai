@@ -3,7 +3,7 @@ import { Box, Button, Input } from "@mui/material";
 import { storage } from "../../firestore";
 import { ref, uploadBytes, listAll } from "firebase/storage";
 
-export function AudioFilePage() {
+export function AudioUploadComponent() {
   const [file, setFile] = useState([]);
   const [fileList, setFileList] = useState([]);
 

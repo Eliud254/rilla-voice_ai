@@ -5,7 +5,8 @@ import axios from "axios";
 import { Button, Typography, TextField, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
-import { AudioFilePage } from "./pages/audio_file_page";
+import { AudioUploadComponent } from "./pages/audioUploadComponent";
+import { AudioRecordComponent } from "./pages/audioRecordComponent";
 
 export default function Home() {
   const [transcript, setTranscript] = useState("");
@@ -18,6 +19,7 @@ export default function Home() {
   const [aiResponse, setAiResponse] = useState("");
 
   let mediaRecorder; // Define mediaRecorder globally within the component
+  let audioChunks = []; // Define audioChunks globally
 
   const handleSelection = () => {
     const selection = window.getSelection();
@@ -44,67 +46,11 @@ export default function Home() {
     setFile(e.target.files[0]);
   };
 
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorder = new MediaRecorder(stream);
-      const audioChunks = [];
-
-      mediaRecorder.ondataavailable = (event) => {
-        audioChunks.push(event.data);
-      };
-
-      mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-        const url = URL.createObjectURL(audioBlob);
-        setAudioUrl(url);
-      };
-
-      setRecording(true);
-      mediaRecorder.start();
-    } catch (error) {
-      console.error("Error accessing microphone:", error);
-    }
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorder) {
-      mediaRecorder.stop();
-      setRecording(false);
-    }
-  };
-
-  const handleAudioUpload = async () => {
-    if (!audioUrl) return;
-
-    try {
-      setRecording(true);
-      const response = await axios.post("/api/transcribe", { audioUrl });
-      setTranscript(response.data.transcript);
-      const aiResponse = await getAiResponse(response.data.transcript);
-      setAiResponse(aiResponse);
-    } catch (error) {
-      console.error("Error processing audio:", error);
-      setAiResponse("Error processing audio");
-    } finally {
-      setRecording(false);
-    }
-  };
-
-  const getAiResponse = async (text) => {
-    try {
-      const response = await axios.post("/api/ai", { text });
-      return response.data.message;
-    } catch (error) {
-      console.error("Error getting AI response:", error);
-      return "Error getting AI response";
-    }
-  };
-
   return (
     <>
       <main className={styles.main}>
-        <AudioFilePage />
+        <AudioUploadComponent />
+        <AudioRecordComponent />
         <Typography variant="h4" gutterBottom>
           Transcript Commenting & Editing System
         </Typography>
@@ -119,35 +65,6 @@ export default function Home() {
             placeholder="Insert Text to use or transcribe audio"
           />
         </div>
-
-        <div className={styles.audioRecording}>
-          <button
-            className={`${styles.button} ${
-              recording ? styles.buttonRecording : ""
-            }`}
-            onClick={startRecording}
-            disabled={recording}
-          >
-            Start Recording
-          </button>
-          <button
-            className={styles.button}
-            onClick={stopRecording}
-            disabled={!recording}
-          />
-
-          <Button onClick={startRecording} disabled={recording}>
-            Start Recording
-          </Button>
-          <Button onClick={stopRecording} disabled={!recording}>
-            Stop Recording
-          </Button>
-          {audioUrl && <audio src={audioUrl} controls />}
-        </div>
-
-        <Button onClick={handleAudioUpload} disabled={!audioUrl}>
-          Upload and Transcribe
-        </Button>
 
         <div className={styles.commentForm}>
           <TextField
@@ -224,3 +141,99 @@ export default function Home() {
     </>
   );
 }
+
+{
+  /* <div className={styles.audioRecording}>
+          <button
+            className={`${styles.button} ${
+              recording ? styles.buttonRecording : ""
+            }`}
+            onClick={startRecording}
+            disabled={recording}
+          >
+            Start Recording
+          </button>
+          <button
+            className={styles.button}
+            onClick={stopRecording}
+            disabled={!recording}
+          />
+
+          <Button onClick={startRecording} disabled={recording}>
+            Start Recording
+          </Button>
+          <Button onClick={stopRecording} disabled={!recording}>
+            Stop Recording
+          </Button>
+          {audioUrl && <audio src={audioUrl} controls />}
+        </div>
+
+        <Button onClick={handleAudioUpload} disabled={!audioUrl}>
+          Upload and Transcribe
+        </Button> */
+}
+
+// const startRecording = async () => {
+//   try {
+//     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+//     mediaRecorder = new MediaRecorder(stream);
+//     audioChunks = []; // Reset audioChunks when starting a new recording
+
+//     mediaRecorder.ondataavailable = (event) => {
+//       audioChunks.push(event.data);
+//     };
+
+//     mediaRecorder.onstop = async () => {
+//       const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+//       const url = URL.createObjectURL(audioBlob);
+//       setAudioUrl(url);
+
+//       // Store the recorded audio file in Firebase Storage
+//       const fileName = `recording-${Date.now()}.webm`;
+//       const storage = getStorage();
+//       const storageRef = ref(storage, fileName);
+//       const file = new File([audioBlob], fileName, { type: "audio/webm" });
+//       await uploadBytes(storageRef, file);
+//       console.log("Uploaded file:", fileName);
+//     };
+
+//     setRecording(true);
+//     mediaRecorder.start();
+//   } catch (error) {
+//     console.error("Error accessing microphone:", error);
+//   }
+// };
+
+// const stopRecording = () => {
+//   if (mediaRecorder && mediaRecorder.state !== "inactive") {
+//     mediaRecorder.stop();
+//     setRecording(false);
+//   }
+// };
+
+// const handleAudioUpload = async () => {
+//   if (!audioUrl) return;
+
+//   try {
+//     setRecording(true);
+//     const response = await axios.post("/api/transcribe", { audioUrl });
+//     setTranscript(response.data.transcript);
+//     const aiResponse = await getAiResponse(response.data.transcript);
+//     setAiResponse(aiResponse);
+//   } catch (error) {
+//     console.error("Error processing audio:", error);
+//     setAiResponse("Error processing audio");
+//   } finally {
+//     setRecording(false);
+//   }
+// };
+
+// const getAiResponse = async (text) => {
+//   try {
+//     const response = await axios.post("/api/ai", { text });
+//     return response.data.message;
+//   } catch (error) {
+//     console.error("Error getting AI response:", error);
+//     return "Error getting AI response";
+//   }
+// };
