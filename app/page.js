@@ -51,6 +51,17 @@ export default function Home() {
   };
 
   const handleAudioUpload = async () => {
+    try {
+      setRecording(true);
+      const response = await getAiResponse();
+      setAiResponse(response);
+    } catch (error) {
+      console.error('Error processing audio:', error);
+      setAiResponse('Error processing audio');
+    } finally {
+      setRecording(false);
+    }
+  
     // Upload audio to your server or a third-party service and transcribe it
     // For example, use an API like OpenAI Whisper for transcription
 
@@ -62,10 +73,53 @@ export default function Home() {
     setAiResponse(response);
   };
 
-  const getAiResponse = async (text) => {
+  const getAiResponse = async () => {
     // Replace with your AI API call
-    const response = await axios.post('/api/ai', { text });
-    return response.data.message;
+    return new Promise(async (resolve, reject) => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream);
+        const audioChunks = [];
+  
+        mediaRecorder.ondataavailable = (event) => {
+          audioChunks.push(event.data);
+        };
+  
+        mediaRecorder.onstop = async () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          const formData = new FormData();
+          formData.append('audio', audioBlob, 'recording.webm');
+  
+          try {
+            const response = await axios.post('/api/ai', formData, {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            });
+            resolve(response.data.message);
+          } catch (error) {
+            console.error('Error sending audio to AI:', error);
+            reject('Error processing audio');
+          } finally {
+            stream.getTracks().forEach(track => track.stop());
+          }
+        };
+  
+        mediaRecorder.start();
+  
+        // Record for 5 seconds (adjust as needed)
+        setTimeout(() => {
+          mediaRecorder.stop();
+        }, 5000);
+  
+      } catch (error) {
+        console.error('Error accessing microphone:', error);
+        reject('Error accessing microphone');
+      }
+    });
+
+    /*const response = await axios.post('/api/ai', { text });
+    return response.data.message;*/
   };
 
   useEffect(() => {
