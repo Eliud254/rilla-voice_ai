@@ -1,8 +1,8 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styles from './page.module.css';
 import axios from 'axios';
-import { Button, CircularProgress, Typography, TextField, IconButton } from '@mui/material';
+import { Button, Typography, TextField, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 
@@ -15,6 +15,8 @@ export default function Home() {
   const [recording, setRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState(null);
   const [aiResponse, setAiResponse] = useState('');
+
+  let mediaRecorder; // Define mediaRecorder globally within the component
 
   const handleSelection = () => {
     const selection = window.getSelection();
@@ -41,7 +43,7 @@ export default function Home() {
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder = new MediaRecorder(stream);
       const audioChunks = [];
 
       mediaRecorder.ondataavailable = (event) => {
@@ -56,13 +58,15 @@ export default function Home() {
 
       setRecording(true);
       mediaRecorder.start();
-
-      setTimeout(() => {
-        mediaRecorder.stop();
-        setRecording(false);
-      }, 5000); // Record for 5 seconds
     } catch (error) {
       console.error('Error accessing microphone:', error);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder) {
+      mediaRecorder.stop();
+      setRecording(false);
     }
   };
 
@@ -118,7 +122,9 @@ export default function Home() {
         {audioUrl && <audio src={audioUrl} controls />}
       </div>
 
-      <Button onClick={handleAudioUpload}>Upload and Transcribe</Button>
+      <Button onClick={handleAudioUpload} disabled={!audioUrl}>
+        Upload and Transcribe
+      </Button>
 
       <div className={styles.commentForm}>
         <TextField
