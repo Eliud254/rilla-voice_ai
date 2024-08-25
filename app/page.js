@@ -34,7 +34,7 @@ export default function Home() {
 
   return (
     <main className={styles.main}>
-      <h1>Transcript Commenting & Editing System</h1>
+      <h1>Rimol Voice AI</h1>
       
       <div className={styles.transcriptContainer} onMouseUp={handleSelection}>
         {transcript}
