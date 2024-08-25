@@ -2,7 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import axios from 'axios';
-import { Button, CircularProgress, Typography } from '@mui/material';
+import { Button, CircularProgress, Typography, TextField, IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 
 export default function Home() {
   const [transcript, setTranscript] = useState('');
@@ -36,137 +38,124 @@ export default function Home() {
     setFile(e.target.files[0]);
   };
 
-  const startRecording = () => {
-    setRecording(true);
-    const mediaRecorder = new MediaRecorder(window.stream);
-    mediaRecorder.ondataavailable = function(e) {
-      const url = URL.createObjectURL(e.data);
-      setAudioUrl(url);
-    };
-    mediaRecorder.start();
-  };
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      const audioChunks = [];
 
-  const stopRecording = () => {
-    setRecording(false);
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const url = URL.createObjectURL(audioBlob);
+        setAudioUrl(url);
+      };
+
+      setRecording(true);
+      mediaRecorder.start();
+
+      setTimeout(() => {
+        mediaRecorder.stop();
+        setRecording(false);
+      }, 5000); // Record for 5 seconds
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+    }
   };
 
   const handleAudioUpload = async () => {
+    if (!audioUrl) return;
+
     try {
       setRecording(true);
-      const response = await getAiResponse();
-      setAiResponse(response);
+      const response = await axios.post('/api/transcribe', { audioUrl });
+      setTranscript(response.data.transcript);
+      const aiResponse = await getAiResponse(response.data.transcript);
+      setAiResponse(aiResponse);
     } catch (error) {
       console.error('Error processing audio:', error);
       setAiResponse('Error processing audio');
     } finally {
       setRecording(false);
     }
-  
-    // Upload audio to your server or a third-party service and transcribe it
-    // For example, use an API like OpenAI Whisper for transcription
-
-    const transcriptedText = "Transcribed text here..."; // Replace this with actual transcribed text
-    setTranscript(transcriptedText);
-
-    // Get AI response
-    const response = await getAiResponse(transcriptedText);
-    setAiResponse(response);
   };
 
-  const getAiResponse = async () => {
-    // Replace with your AI API call
-    return new Promise(async (resolve, reject) => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const mediaRecorder = new MediaRecorder(stream);
-        const audioChunks = [];
-  
-        mediaRecorder.ondataavailable = (event) => {
-          audioChunks.push(event.data);
-        };
-  
-        mediaRecorder.onstop = async () => {
-          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-          const formData = new FormData();
-          formData.append('audio', audioBlob, 'recording.webm');
-  
-          try {
-            const response = await axios.post('/api/ai', formData, {
-              headers: {
-                'Content-Type': 'multipart/form-data',
-              },
-            });
-            resolve(response.data.message);
-          } catch (error) {
-            console.error('Error sending audio to AI:', error);
-            reject('Error processing audio');
-          } finally {
-            stream.getTracks().forEach(track => track.stop());
-          }
-        };
-  
-        mediaRecorder.start();
-  
-        // Record for 5 seconds (adjust as needed)
-        setTimeout(() => {
-          mediaRecorder.stop();
-        }, 5000);
-  
-      } catch (error) {
-        console.error('Error accessing microphone:', error);
-        reject('Error accessing microphone');
-      }
-    });
-
-    /*const response = await axios.post('/api/ai', { text });
-    return response.data.message;*/
-c  };
-
-  useEffect(() => {
-    // Ensure media devices are ready
-    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-      window.stream = stream;
-    });
-  }, []);
+  const getAiResponse = async (text) => {
+    try {
+      const response = await axios.post('/api/ai', { text });
+      return response.data.message;
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      return 'Error getting AI response';
+    }
+  };
 
   return (
     <main className={styles.main}>
-      <h1>Transcript Commenting & Editing System</h1>
+      <Typography variant="h4" gutterBottom>Transcript Commenting & Editing System</Typography>
       
       <div className={styles.transcriptContainer} onMouseUp={handleSelection}>
-        {transcript || "Insert Text to use."}
+        <TextField
+          multiline
+          fullWidth
+          variant="outlined"
+          value={transcript}
+          onChange={(e) => setTranscript(e.target.value)}
+          placeholder="Insert Text to use or transcribe audio"
+        />
       </div>
 
       <div className={styles.audioRecording}>
-        <Button onClick={startRecording} disabled={recording}>
-          Start Recording
+        <Button variant="contained" onClick={startRecording} disabled={recording}>
+          {recording ? 'Recording...' : 'Start Recording'}
         </Button>
-        <Button onClick={stopRecording} disabled={!recording}>
-          Stop Recording
+        {audioUrl && <audio src={audioUrl} controls className={styles.audioPlayer} />}
+        <Button variant="contained" onClick={handleAudioUpload} disabled={!audioUrl || recording}>
+          Transcribe Audio
         </Button>
-        {audioUrl && <audio src={audioUrl} controls />}
       </div>
 
-      <Button onClick={handleAudioUpload}>Upload and Transcribe</Button>
-
       <div className={styles.commentForm}>
-        <textarea
+        <TextField
+          multiline
+          fullWidth
+          variant="outlined"
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           placeholder="Add a comment..."
         />
-        <input type="file" onChange={handleFileChange} />
-        <button onClick={addComment}>Add Comment</button>
+        <input
+          accept="image/*,audio/*,video/*,application/pdf"
+          style={{ display: 'none' }}
+          id="raised-button-file"
+          multiple
+          type="file"
+          onChange={handleFileChange}
+        />
+        <label htmlFor="raised-button-file">
+          <Button variant="contained" component="span" startIcon={<AttachFileIcon />}>
+            Attach File
+          </Button>
+        </label>
+        {file && <Typography variant="body2">{file.name}</Typography>}
+        <Button variant="contained" onClick={addComment} disabled={!selectedText || !newComment}>
+          Add Comment
+        </Button>
       </div>
 
       <div className={styles.commentsContainer}>
-        <h2>Comments:</h2>
+        <Typography variant="h6">Comments:</Typography>
         {comments.map((comment, index) => (
           <div key={index} className={styles.comment}>
-            <p><strong>Selected text:</strong> {comment.text}</p>
-            <p><strong>Comment:</strong> {comment.comment}</p>
-            {comment.file && <p><strong>Attached file:</strong> {comment.file.name}</p>}
-            <button onClick={() => deleteComment(index)}>Delete</button>
+            <Typography variant="subtitle1">Selected text: {comment.text}</Typography>
+            <Typography variant="body1">Comment: {comment.comment}</Typography>
+            {comment.file && <Typography variant="body2">Attached file: {comment.file.name}</Typography>}
+            <IconButton onClick={() => deleteComment(index)}>
+              <DeleteIcon />
+            </IconButton>
           </div>
         ))}
       </div>
@@ -174,7 +163,7 @@ c  };
       {aiResponse && (
         <div className={styles.aiResponse}>
           <Typography variant="h6">AI Response:</Typography>
-          <p>{aiResponse}</p>
+          <Typography variant="body1">{aiResponse}</Typography>
         </div>
       )}
     </main>
