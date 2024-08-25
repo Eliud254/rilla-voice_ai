@@ -83,6 +83,13 @@ export default function Home() {
     }
   };
 
+  const stopRecording = () => {
+    setRecording(false);
+    // Assuming you have access to the mediaRecorder instance, you would call:
+    // mediaRecorder.stop();
+    // You might need to store the mediaRecorder in a ref or state to access it here
+  };
+
   const getAiResponse = async (text) => {
     try {
       const response = await axios.post('/api/ai', { text });
@@ -109,7 +116,6 @@ export default function Home() {
       </div>
 
       <div className={styles.audioRecording}>
-<<<<<<< HEAD
         <button 
           className={`${styles.button} ${recording ? styles.buttonRecording : ''}`} 
           onClick={startRecording} 
@@ -121,13 +127,11 @@ export default function Home() {
           className={styles.button}
           onClick={stopRecording} 
           disabled={!recording}
-        >
-=======
+        />
         <Button onClick={startRecording} disabled={recording}>
           Start Recording
         </Button>
         <Button onClick={stopRecording} disabled={!recording}>
->>>>>>> b25330b94df320272bf96df0c2667d4a27397cdf
           Stop Recording
         </Button>
         {audioUrl && <audio src={audioUrl} controls />}
@@ -136,26 +140,19 @@ export default function Home() {
       <Button onClick={handleAudioUpload}>Upload and Transcribe</Button>
 
       <div className={styles.commentForm}>
-<<<<<<< HEAD
         <textarea
           className={styles.commentTextarea}
-=======
-        <TextField
-          multiline
-          fullWidth
-          variant="outlined"
->>>>>>> b25330b94df320272bf96df0c2667d4a27397cdf
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           placeholder="Add a comment..."
         />
-<<<<<<< HEAD
+
         <label className={styles.fileInput}>
           Choose File
           <input type="file" onChange={handleFileChange} />
         </label>
         <button className={styles.addCommentButton} onClick={addComment}>Add Comment</button>
-=======
+      
         <input
           accept="image/*,audio/*,video/*,application/pdf"
           style={{ display: 'none' }}
@@ -173,7 +170,6 @@ export default function Home() {
         <Button variant="contained" onClick={addComment} disabled={!selectedText || !newComment}>
           Add Comment
         </Button>
->>>>>>> b25330b94df320272bf96df0c2667d4a27397cdf
       </div>
 
       <div className={styles.commentsContainer}>
