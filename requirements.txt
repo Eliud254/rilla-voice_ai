@@ -1,0 +1,10 @@
+anaconda-anon-usage==0.4.4
+brotli==1.0.9
+conda-content-trust==0.2.0
+flask-cors==4.0.1
+openai==1.42.0
+pip-chill==1.0.3
+pysocks==1.7.1
+ruamel.yaml==0.17.21
+scipy==1.14.1
+sounddevice==0.5.0
