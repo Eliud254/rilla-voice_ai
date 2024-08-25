@@ -14,6 +14,31 @@
 .main {
   padding: 20px;
 }
+/**new changes starts **/
+.aiResponse {
+  width: 100%;
+  max-width: 800px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 2rem;
+}
+
+.audioRecording {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  width: 100%;
+  max-width: 800px;
+}
+
+.audioPlayer {
+  width: 100%;
+}
+
+/**Ends**/
 
 .transcriptContainer {
   border: 1px solid #ccc;
@@ -237,6 +262,9 @@
     padding: 4rem;
   }
 
+  .audioRecording {
+    flex-direction: column;
+  }
   .grid {
     grid-template-columns: 1fr;
     margin-bottom: 120px;
