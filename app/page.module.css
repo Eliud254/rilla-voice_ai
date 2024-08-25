@@ -5,6 +5,7 @@
   align-items: center;
   padding: 6rem;
   min-height: 100vh;
+  background: linear-gradient(to bottom, hwb(226 11% 48%), hsl(204, 88%, 52%));
 }
 
 .main {
