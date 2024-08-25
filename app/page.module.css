@@ -67,7 +67,7 @@
   margin-bottom: 10px;
 }
 
-.button {
+.button, .fileInput, .addCommentButton {
   background-color: rgba(255, 255, 255, 0.8);
   border: none;
   border-radius: 37.5px;
@@ -82,10 +82,58 @@
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
 }
 
-.button:hover {
+.button:hover, .fileInput:hover, .addCommentButton:hover {
   background-color: rgba(255, 255, 255, 1);
   text-shadow: 0 0 15px rgba(10, 143, 196, 0.8);
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+}
+
+.fileInput {
+  display: inline-block;
+  overflow: hidden;
+  position: relative;
+}
+
+.fileInput input[type="file"] {
+  font-size: 100px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.commentForm {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* This adds space between the buttons */
+}
+
+.commentTextarea {
+  flex-grow: 1;
+  margin-right: 15px;
+}
+
+.fileInput, .addCommentButton {
+  flex-shrink: 0;
+}
+
+
+.buttonRecording {
+  background-color: rgba(255, 0, 0, 0.8);
+  animation: pulseRed 2s infinite;
+}
+
+@keyframes pulseRed {
+  0% {
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(255, 0, 0, 0.7);
+  }
+  100% {
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+  }
 }
 
 
