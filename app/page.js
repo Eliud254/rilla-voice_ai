@@ -2,6 +2,8 @@
 'use client';
 import React, { useState } from 'react';
 import styles from './page.module.css';
+import axios from 'axios';
+import { Button, CircularProgress, Typography } from '@mui/material';
 
 export default function Home() {
   const [transcript, setTranscript] = useState('Insert Text to use.');
@@ -9,6 +11,23 @@ export default function Home() {
   const [selectedText, setSelectedText] = useState('');
   const [newComment, setNewComment] = useState('');
   const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const handleRecord = async () => {
+    setLoading(true);
+    console.log("Button clicked, starting recording...");
+    try {
+      const response = await axios.post('http://localhost:5000/record', { duration: 5 });
+      console.log("Recording successful:", response.data);
+      setMessage(response.data.message);
+    } catch (error) {
+      console.error("Error during recording:", error);
+      setMessage('Error recording audio.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSelection = () => {
     const selection = window.getSelection();
@@ -61,7 +80,16 @@ export default function Home() {
           </div>
         ))}
       </div>
+
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+      <Typography variant="h4">Sales Call Feedback</Typography>
+      <Button variant="contained" onClick={handleRecord} disabled={loading}>
+        {loading ? <CircularProgress size={24} /> : 'Start Recording'}
+      </Button>
+      {message && <Typography variant="body1" style={{ marginTop: '20px' }}>{message}</Typography>}
+    </div>
     </main>
+    
   );
 }
 
