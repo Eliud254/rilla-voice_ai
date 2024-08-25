@@ -113,6 +113,19 @@ export default function Home() {
       </div>
 
       <div className={styles.audioRecording}>
+        <button 
+          className={`${styles.button} ${recording ? styles.buttonRecording : ''}`} 
+          onClick={startRecording} 
+          disabled={recording}
+        >
+          Start Recording
+        </button>
+        <button 
+          className={styles.button}
+          onClick={stopRecording} 
+          disabled={!recording}
+        />
+
         <Button onClick={startRecording} disabled={recording}>
           Start Recording
         </Button>
@@ -135,6 +148,12 @@ export default function Home() {
           onChange={(e) => setNewComment(e.target.value)}
           placeholder="Add a comment..."
         />
+        <label className={styles.fileInput}>
+          Choose File
+          <input type="file" onChange={handleFileChange} />
+        </label>
+        <button className={styles.addCommentButton} onClick={addComment}>Add Comment</button>
+
         <input
           accept="image/*,audio/*,video/*,application/pdf"
           style={{ display: 'none' }}
@@ -167,7 +186,6 @@ export default function Home() {
           </div>
         ))}
       </div>
-
       {aiResponse && (
         <div className={styles.aiResponse}>
           <Typography variant="h6">AI Response:</Typography>
