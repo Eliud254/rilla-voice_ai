@@ -40,7 +40,7 @@ def transcribe_audio(file_path):
 
 if __name__ == "__main__":
     # Replace this with the actual path to your audio file
-    audio_file_path = "path/to/your/audio/file.wav"
+    audio_file_path = "https://console.firebase.google.com/u/0/project/sales-manager-transcripts/storage/sales-manager-transcripts.appspot.com/files"
     
     if not os.path.exists(audio_file_path):
         print(f"Error: The file {audio_file_path} does not exist.")
