@@ -87,13 +87,6 @@ export default function Home() {
     }
   };
 
-  const stopRecording = () => {
-    setRecording(false);
-    // Assuming you have access to the mediaRecorder instance, you would call:
-    // mediaRecorder.stop();
-    // You might need to store the mediaRecorder in a ref or state to access it here
-  };
-
   const getAiResponse = async (text) => {
     try {
       const response = await axios.post('/api/ai', { text });
@@ -147,9 +140,6 @@ export default function Home() {
       </Button>
 
       <div className={styles.commentForm}>
-
-        <textarea
-          className={styles.commentTextarea}
         <TextField
           multiline
           fullWidth
